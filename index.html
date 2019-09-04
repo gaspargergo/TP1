@@ -93,21 +93,92 @@
   ctx.clearRect(0, 0, c.width, c.height);
   //fixed size: 20x20, therefore each little "pixel" is 30px x 30px
   var numOfPixels = 400;
-  var pixelSize = c.height/Math.sqrt(numOfPixels);
-  
+  var pixelSize = c.height/Math.sqrt(numOfPixels); //the number of shapes in a picture (refreshed in every colorPixels call)
 
-  function colorPixels(){
+  function colorPixels(seq){ //seq = an array of shape types
     var x = 0;
     var y = 0;
+    pixelSize = c.height/Math.sqrt(numOfPixels); 
+    var direction = 0; //0 = right, 1 = down, 2 = leftFromLine, 3 = up | The way the drawing is headed
+    var lineLength = c.width/pixelSize; //how many shapes in a line
     ctx.clearRect(0, 0, c.width, c.height);
-    ctx.lineWidth = 3;
+    ctx.lineWidth = pixelSize/10; //arbitrary number, this looks good
 
-    var types = Math.floor(Math.random()*12)+3;
-    console.log(types);
+    var types = 0;
+    var temp = [];
 
+    if(!seq){ //if no input sequence, generating a random one
+        types = Math.floor(Math.random() * (Math.sqrt(numOfPixels) - 2) + 3); //generates random number between 3 and 20, specifies the length of the sequence
+        for(var i = 0; i < types; i++){
+                temp.push(Math.floor(Math.random() * 15)); //generates random number between 0 and 14, picks shapes
+        }
+        seq = temp;
+    }
+    
+    var nextShape = 0;
+    var leftFromLine = lineLength-1; //how many shapes are left from drawing a line(one is there for compensation)
+    var lineCounter = 0; //Counting the amount being removed from the next line
+    var tempCounter = 0; //counter so the lineCounter grows only every other turn after the first one
     for(var i = 0; i < numOfPixels; i++){
 
-      switch(Math.floor(Math.random()*types)){
+        //drawing current shape and selecting new one
+        drawShape(seq[nextShape],x,y);      
+        if(nextShape == seq.length-1) nextShape = 0;
+        else nextShape++;
+
+        //movement
+        if(leftFromLine > 0){ //normal movement
+            switch(direction){
+                case 0:
+                    x += pixelSize;
+                    break;
+                case 1:
+                    y += pixelSize;
+                    break;
+                case 2:
+                    x -= pixelSize;
+                    break;
+                case 3:
+                    y -= pixelSize;
+                    break;
+            }
+            leftFromLine--;
+        }
+        else{ //when at the end of the line
+            if(lineCounter == 0) lineCounter++; //cheking if first line
+            else{ //if not first line, adding one to the linecounter every other line
+                if(tempCounter == 0) tempCounter++;
+                else{
+                    tempCounter = 0;
+                    lineCounter++;
+                }
+            }
+            leftFromLine = lineLength -1 - lineCounter; //always one less (one is there for compensation)
+
+            switch(direction){
+                case 0:
+                    y += pixelSize;
+                    direction++;
+                    break;
+                case 1:
+                    x -= pixelSize;
+                    direction++;
+                    break;
+                case 2:
+                    y -= pixelSize;
+                    direction++;
+                    break;
+                case 3:
+                    x += pixelSize;
+                    direction = 0;
+                    break;
+            }
+        }
+    }
+  }
+
+function drawShape(type,x,y){
+    switch(type){
         case 0:
             ctx.beginPath();
             ctx.moveTo(x+pixelSize/2,y);
@@ -233,178 +304,23 @@
             ctx.stroke();
             break;
       }
-
-      if(x == c.width-pixelSize){
-        x = 0;
-        y += pixelSize;
-      }
-      else{
-        x += pixelSize;
-      }
-    }
-  }
+}
 
 
 function drawEasterEgg(){
     
-    switch(Math.floor(Math.random())){
-      case 0:
-        drawCode("0123456789012345678956789012345678901230434567890123456789413234567890123456705221256789012345678163101490123456789892740903856789012309038598927434567894101496878163234567052125077670521256781632361865694101498927434729545830903210385458304347298987654965694132361876543210767052212507654321098781631014987654321098927409032109876543210385989876543210987654968765432109876543210776543210987654321098");
-        break;
-    }
-  }
-
-
-
-  function drawCode(code){
-    var numOfPixels = code.length;
-    var pixelSize = c.height/Math.sqrt(numOfPixels);
-
-    var x = 0;
-    var y = 0;
-    ctx.clearRect(0, 0, c.width, c.height);
-    ctx.lineWidth = 3;
-
-    var types = 9;
-
-    for(var i = 0; i < numOfPixels; i++){
-
-      switch(Number(code[i])){
+    switch(Math.round(Math.random())){
         case 0:
-            ctx.beginPath();
-            ctx.moveTo(x+pixelSize/2,y);
-            ctx.lineTo(x+pixelSize/2,y+pixelSize);
-            ctx.stroke();
+            numOfPixels = 400;
+            colorPixels([0,1,2,3,4,5,6,7,8,9]);
             break;
         case 1:
-            ctx.beginPath();
-            ctx.moveTo(x,y+pixelSize/2);
-            ctx.lineTo(x+pixelSize,y+pixelSize/2);
-            ctx.stroke();
+            numOfPixels = 484;
+            colorPixels([0,1,2,3,4,5,2,2,6,7,10,2,8,9,11,13,12,14,5,5,5,5]);
             break;
-        case 2:
-            ctx.beginPath();
-            ctx.moveTo(x+pixelSize/2,y);
-            ctx.lineTo(x+pixelSize/2,y+pixelSize);
-            ctx.moveTo(x,y+pixelSize/2);
-            ctx.lineTo(x+pixelSize,y+pixelSize/2);
-            ctx.stroke();
-            break;
-        case 3:
-            ctx.beginPath();
-            ctx.moveTo(x,y+pixelSize);
-            ctx.lineTo(x+pixelSize,y);
-            ctx.stroke();
-            break;
-        case 4:
-            ctx.beginPath();
-            ctx.moveTo(x,y);
-            ctx.lineTo(x+pixelSize,y+pixelSize);
-            ctx.stroke();
-            break;
-        case 5:
-            ctx.beginPath();
-            ctx.moveTo(x,y);
-            ctx.lineTo(x+pixelSize,y+pixelSize);
-            ctx.moveTo(x,y+pixelSize);
-            ctx.lineTo(x+pixelSize,y);
-            ctx.stroke();
-            break;
-        case 6:
-            ctx.beginPath();
-            ctx.moveTo(x+pixelSize/2,y);
-            ctx.lineTo(x+pixelSize/2,y+pixelSize);
-            ctx.moveTo(x,y+pixelSize);
-            ctx.lineTo(x+pixelSize,y);
-            ctx.stroke();
-            break;
-        case 7:
-            ctx.beginPath();
-            ctx.moveTo(x+pixelSize/2,y);
-            ctx.lineTo(x+pixelSize/2,y+pixelSize);
-            ctx.moveTo(x,y);
-            ctx.lineTo(x+pixelSize,y+pixelSize);
-            ctx.stroke();
-            break;
-        case 8:
-            ctx.beginPath();
-            ctx.moveTo(x,y+pixelSize/2);
-            ctx.lineTo(x+pixelSize,y+pixelSize/2);
-            ctx.moveTo(x,y+pixelSize);
-            ctx.lineTo(x+pixelSize,y);
-            ctx.stroke();
-            break;
-        case 9:
-            ctx.beginPath();
-            ctx.moveTo(x,y+pixelSize/2);
-            ctx.lineTo(x+pixelSize,y+pixelSize/2);
-            ctx.moveTo(x,y);
-            ctx.lineTo(x+pixelSize,y+pixelSize);
-            ctx.stroke();
-            break;
-        case 10:
-            ctx.beginPath();
-            ctx.moveTo(x+pixelSize/2,y);
-            ctx.lineTo(x+pixelSize/2,y+pixelSize);
-            ctx.moveTo(x,y);
-            ctx.lineTo(x+pixelSize,y+pixelSize);
-            ctx.moveTo(x,y+pixelSize);
-            ctx.lineTo(x+pixelSize,y);
-            ctx.stroke();
-            break;
-        case 11:
-            ctx.beginPath();
-            ctx.moveTo(x,y+pixelSize/2);
-            ctx.lineTo(x+pixelSize,y+pixelSize/2);
-            ctx.moveTo(x,y);
-            ctx.lineTo(x+pixelSize,y+pixelSize);
-            ctx.moveTo(x,y+pixelSize);
-            ctx.lineTo(x+pixelSize,y);
-            ctx.stroke();
-            break;
-        case 12:
-            ctx.beginPath();
-            ctx.moveTo(x,y);
-            ctx.lineTo(x+pixelSize,y+pixelSize);
-            ctx.moveTo(x+pixelSize/2,y);
-            ctx.lineTo(x+pixelSize/2,y+pixelSize);
-            ctx.moveTo(x,y+pixelSize/2);
-            ctx.lineTo(x+pixelSize,y+pixelSize/2);
-            ctx.stroke();
-            break;
-        case 13:
-            ctx.beginPath();
-            ctx.moveTo(x,y+pixelSize);
-            ctx.lineTo(x+pixelSize,y);
-            ctx.moveTo(x+pixelSize/2,y);
-            ctx.lineTo(x+pixelSize/2,y+pixelSize);
-            ctx.moveTo(x,y+pixelSize/2);
-            ctx.lineTo(x+pixelSize,y+pixelSize/2);
-            ctx.stroke();
-            break;
-        case 14:
-            ctx.beginPath();
-            ctx.moveTo(x,y);
-            ctx.lineTo(x+pixelSize,y+pixelSize);
-            ctx.moveTo(x,y+pixelSize);
-            ctx.lineTo(x+pixelSize,y);
-            ctx.moveTo(x+pixelSize/2,y);
-            ctx.lineTo(x+pixelSize/2,y+pixelSize);
-            ctx.moveTo(x,y+pixelSize/2);
-            ctx.lineTo(x+pixelSize,y+pixelSize/2);
-            ctx.stroke();
-            break;
-      }
-
-      if(x == c.width-pixelSize){
-        x = 0;
-        y += pixelSize;
-      }
-      else{
-        x += pixelSize;
-      }
     }
   }
+
 
   </script>
 </body>
