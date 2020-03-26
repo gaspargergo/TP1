@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>instant Art</title>
+  <title>Türk Péter</title>
   <link href="https://fonts.googleapis.com/css?family=Shrikhand" rel="stylesheet">
 
   <style>
@@ -71,9 +71,7 @@
 </head>
 
 <body>
-  <center><a id="title" onClick="colorPixels()">instant <span>ART</span></a>
-    <a onClick="drawEasterEgg()"><p id="text">Just like Türk Péter!</p></a>
-
+  <center>
   <div id="container"><canvas id="canvas" height="600px" width="600px"></canvas></div>
 
 </center>
@@ -94,6 +92,8 @@
   //fixed size: 20x20, therefore each little "pixel" is 30px x 30px
   var numOfPixels = 400;
   var pixelSize = c.height/Math.sqrt(numOfPixels); //the number of shapes in a picture (refreshed in every colorPixels call)
+
+  colorPixels();
 
   function colorPixels(seq){ //seq = an array of shape types
     var x = 0;
